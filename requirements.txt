@@ -1,0 +1,3 @@
+Scrapy==1.2.0
+requests==2.11.1
+python-twitter==3.1
