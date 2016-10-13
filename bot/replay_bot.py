@@ -1,11 +1,19 @@
 import twitter
 from datetime import datetime, timedelta
 import json
+import os
+import sys
 
 # replay_bot.py: Tweet a timeline of events
 #
 # (c) 2016 Matt Meshulam
 
+def relative_path(filename):
+    if (filename.startswith('/')):
+        return filename
+
+    path = os.path.dirname(__file__) or '.'
+    return path + '/' + filename
 
 def parseTimestamp(tsString):
     try:
@@ -41,8 +49,8 @@ class ReplayBot(object):
 
     def tweet(self, event):
         message = self.template(event)
-        #status = self.api.PostUpdate(message)
-        #print("{}  Tweeted [{}]".format(datetime.now().isoformat(), status.text))
+        status = self.api.PostUpdate(message)
+        print("{}  Tweeted [{}]".format(datetime.now().isoformat(), status.text))
         # TODO: check that tweet was sent?
         if message:
             return event['timestamp']
@@ -67,7 +75,7 @@ def save_timestamp(dt, filename):
 
 def main():
     config = {}
-    with open("bot_config.json") as cfg_file:
+    with open(relative_path('bot_config.json')) as cfg_file:
         config = json.load(cfg_file)
 
     api = twitter.Api(consumer_key=config['tw_consumer_key'],
@@ -76,7 +84,7 @@ def main():
                       access_token_secret=config['tw_access_secret'])
 
     events = []
-    with open(config['event_file']) as event_file:
+    with open(relative_path(config['event_file'])) as event_file:
         events = json.load(event_file)
 
     offset_days = config.get('time_offset_days', 0)
@@ -85,19 +93,20 @@ def main():
 
     last_time = None
     try:
-        with open(config['time_file']) as time_file:
+        with open(relative_path(config['time_file'])) as time_file:
             ts = time_file.readline().strip()
             last_time = parseTimestamp(ts)
     except:
         pass
 
+    print("{} Running ReplayBot".format(datetime.now().isoformat()))
     bot = ReplayBot(api, tweet_template, events,
                     time_offset, last_time)
     pending = bot.pending_events_now()
 
     latest_time = None
     for ev in pending:
-        print("Pending: {}".format(ev))
+        #print("Pending: {}".format(ev))
         res = bot.tweet(ev)
         if res:
             latest_time = res
@@ -106,7 +115,7 @@ def main():
             break
 
     if latest_time:
-        save_timestamp(latest_time, config['time_file'])
+        save_timestamp(latest_time, relative_path(config['time_file']))
 
 
 if __name__ == "__main__":

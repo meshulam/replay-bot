@@ -1,3 +1,4 @@
 bot_config.json
 bot/last_tweet_timestamp
 *.pyc
+*.log
