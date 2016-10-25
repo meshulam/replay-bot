@@ -19,7 +19,7 @@ class ArchiveSpider(scrapy.Spider):
     page_count = 0
 
     start_urls = [
-        'https://web.archive.org/web/20090205221829/http://www.fivethirtyeight.com/2008/10/todays-polls-1016.html'
+        'https://web.archive.org/web/20090205071608/http://www.fivethirtyeight.com/2008/10/mccains-mountain-of-problem.html'
     ]
 
     def parse_article(self, response):
